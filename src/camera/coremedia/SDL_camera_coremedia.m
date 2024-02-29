@@ -45,7 +45,7 @@
 static Uint32 CoreMediaFormatToSDL(FourCharCode fmt)
 {
     // NOTE: since we're setting the AVCaptureVideoDataOutput format to 'BGRA', we only need this format teehee.
-    return SDL_PIXELFORMAT_BGRA32;
+    return SDL_PIXELFORMAT_ARGB32;
     // switch (fmt) {
     //     #define CASE(x, y) case x: return y
     //     // the 16LE ones should use 16BE if we're on a Bigendian system like PowerPC,
@@ -297,7 +297,10 @@ static int COREMEDIA_OpenDevice(SDL_CameraDevice *device, const SDL_CameraSpec *
 
     AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
     // Let the OS handle the pixel format conversion for us, so we can just use BGRA.
-    output.videoSettings = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)};
+    output.videoSettings = @{
+        (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32ARGB),
+        (id)kCVPixelBufferOpenGLCompatibilityKey: @(YES)
+    };
     if (!output) {
         return SDL_SetError("Cannot create AVCaptureVideoDataOutput");
     }
