@@ -128,15 +128,15 @@ struct SDL_CameraDevice
 
     // A queue of surfaces that buffer converted/scaled frames of video until the app claims them.
     SurfaceList output_surfaces[8];
-    SurfaceList filled_output_surfaces;        // this is FIFO
-    SurfaceList empty_output_surfaces;         // this is LIFO
+    SurfaceList filled_output_surfaces; // this is FIFO
+    SurfaceList empty_output_surfaces;  // this is LIFO
     SurfaceList app_held_output_surfaces;
 
     // A fake video frame we allocate if the camera fails/disconnects.
     Uint8 *zombie_pixels;
 
     // non-zero if acquire_surface needs to be scaled for final output.
-    int needs_scaling;  // -1: downscale, 0: no scaling, 1: upscale
+    int needs_scaling; // -1: downscale, 0: no scaling, 1: upscale
 
     // SDL_TRUE if acquire_surface needs to be converted for final output.
     SDL_bool needs_conversion;
@@ -165,8 +165,8 @@ typedef struct SDL_CameraDriverImpl
     void (*CloseDevice)(SDL_CameraDevice *device);
     int (*WaitDevice)(SDL_CameraDevice *device);
     int (*AcquireFrame)(SDL_CameraDevice *device, SDL_Surface *frame, Uint64 *timestampNS); // set frame->pixels, frame->pitch, and *timestampNS!
-    void (*ReleaseFrame)(SDL_CameraDevice *device, SDL_Surface *frame); // Reclaim frame->pixels and frame->pitch!
-    void (*FreeDeviceHandle)(SDL_CameraDevice *device); // SDL is done with this device; free the handle from SDL_AddCameraDevice()
+    void (*ReleaseFrame)(SDL_CameraDevice *device, SDL_Surface *frame);                     // Reclaim frame->pixels and frame->pitch!
+    void (*FreeDeviceHandle)(SDL_CameraDevice *device);                                     // SDL is done with this device; free the handle from SDL_AddCameraDevice()
     void (*Deinitialize)(void);
 
     SDL_bool ProvidesOwnCallbackThread;
@@ -181,17 +181,17 @@ typedef struct SDL_PendingCameraDeviceEvent
 
 typedef struct SDL_CameraDriver
 {
-    const char *name;  // The name of this camera driver
-    const char *desc;  // The description of this camera driver
+    const char *name;          // The name of this camera driver
+    const char *desc;          // The description of this camera driver
     SDL_CameraDriverImpl impl; // the backend's interface
 
-    SDL_RWLock *device_hash_lock;  // A rwlock that protects `device_hash`
-    SDL_HashTable *device_hash;  // the collection of currently-available camera devices
+    SDL_RWLock *device_hash_lock; // A rwlock that protects `device_hash`
+    SDL_HashTable *device_hash;   // the collection of currently-available camera devices
     SDL_PendingCameraDeviceEvent pending_events;
     SDL_PendingCameraDeviceEvent *pending_events_tail;
 
     SDL_AtomicInt device_count;
-    SDL_AtomicInt shutting_down;  // non-zero during SDL_Quit, so we known not to accept any last-minute device hotplugs.
+    SDL_AtomicInt shutting_down; // non-zero during SDL_Quit, so we known not to accept any last-minute device hotplugs.
 } SDL_CameraDriver;
 
 typedef struct CameraBootStrap

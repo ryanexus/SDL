@@ -28,6 +28,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
+#import <CoreVideo/CoreVideo.h>
 
 /*
  * Need to link with:: CoreMedia CoreVideo
@@ -43,26 +44,28 @@
 
 static Uint32 CoreMediaFormatToSDL(FourCharCode fmt)
 {
-    switch (fmt) {
-        #define CASE(x, y) case x: return y
-        // the 16LE ones should use 16BE if we're on a Bigendian system like PowerPC,
-        // but at current time there is no bigendian Apple platform that has CoreMedia.
-        CASE(kCMPixelFormat_16LE555, SDL_PIXELFORMAT_RGB555);
-        CASE(kCMPixelFormat_16LE5551, SDL_PIXELFORMAT_RGBA5551);
-        CASE(kCMPixelFormat_16LE565, SDL_PIXELFORMAT_RGB565);
-        CASE(kCMPixelFormat_24RGB, SDL_PIXELFORMAT_RGB24);
-        CASE(kCMPixelFormat_32ARGB, SDL_PIXELFORMAT_ARGB32);
-        CASE(kCMPixelFormat_32BGRA, SDL_PIXELFORMAT_BGRA32);
-        CASE(kCMPixelFormat_422YpCbCr8, SDL_PIXELFORMAT_YUY2);
-        CASE(kCMPixelFormat_422YpCbCr8_yuvs, SDL_PIXELFORMAT_UYVY);
-        #undef CASE
-        default:
-            #if DEBUG_CAMERA
-            SDL_Log("CAMERA: Unknown format FourCharCode '%d'", (int) fmt);
-            #endif
-            break;
-    }
-    return SDL_PIXELFORMAT_UNKNOWN;
+    // NOTE: since we're setting the AVCaptureVideoDataOutput format to 'BGRA', we only need this format teehee.
+    return SDL_PIXELFORMAT_BGRA32;
+    // switch (fmt) {
+    //     #define CASE(x, y) case x: return y
+    //     // the 16LE ones should use 16BE if we're on a Bigendian system like PowerPC,
+    //     // but at current time there is no bigendian Apple platform that has CoreMedia.
+    //     CASE(kCMPixelFormat_16LE555, SDL_PIXELFORMAT_RGB555);
+    //     CASE(kCMPixelFormat_16LE5551, SDL_PIXELFORMAT_RGBA5551);
+    //     CASE(kCMPixelFormat_16LE565, SDL_PIXELFORMAT_RGB565);
+    //     CASE(kCMPixelFormat_24RGB, SDL_PIXELFORMAT_RGB24);
+    //     CASE(kCMPixelFormat_32ARGB, SDL_PIXELFORMAT_ARGB32);
+    //     CASE(kCMPixelFormat_32BGRA, SDL_PIXELFORMAT_BGRA32);
+    //     CASE(kCMPixelFormat_422YpCbCr8, SDL_PIXELFORMAT_YUY2);
+    //     CASE(kCMPixelFormat_422YpCbCr8_yuvs, SDL_PIXELFORMAT_UYVY);
+    //     #undef CASE
+    //     default:
+    //         #if DEBUG_CAMERA
+    //         SDL_Log("CAMERA: Unknown format FourCharCode '%d'", (int) fmt);
+    //         #endif
+    //         break;
+    // }
+    // return SDL_PIXELFORMAT_UNKNOWN;
 }
 
 @class SDLCaptureVideoDataOutputSampleBufferDelegate;
@@ -293,6 +296,8 @@ static int COREMEDIA_OpenDevice(SDL_CameraDevice *device, const SDL_CameraSpec *
     }
 
     AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
+    // Let the OS handle the pixel format conversion for us, so we can just use BGRA.
+    output.videoSettings = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)};
     if (!output) {
         return SDL_SetError("Cannot create AVCaptureVideoDataOutput");
     }
